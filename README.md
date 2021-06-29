@@ -1,6 +1,6 @@
 ## Effective-Sparsity
 
-This repository contains code for the experimental section of the paper [Connectivity Matters: Neural Network Pruning Through the Lens of Effective Sparsity](https://arxiv.org/user/).
+This repository contains code for the experimental section of the paper *[Connectivity Matters: Neural Network Pruning Through the Lens of Effective Sparsity](https://arxiv.org/user/)*.
 
 ### Environment
 
