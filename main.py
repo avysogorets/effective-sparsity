@@ -47,7 +47,7 @@ if args.architecture=='resnet18':
 
 def main(args):
   target_compression=10**args.com_exp if args.com_exp is not None else 1./(1-args.target_sparsity)
-  extension=f'{args.sample}_{int(target_compression)}_'
+  extension=f'{args.sample}_{round(target_compression)}_'
   path_to_dense=os.path.join(args.out_path,args.architecture,'dense')
   args.out_path=os.path.join(args.out_path,args.architecture,args.pruner,args.pruning_type)
   if not os.path.exists(args.out_path):
