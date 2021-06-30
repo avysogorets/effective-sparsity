@@ -3,7 +3,7 @@
 This repository contains code for the experimental section of the paper *[Connectivity Matters: Neural Network Pruning Through the Lens of Effective Sparsity](https://arxiv.org/user/)*.
 
 #### Environment
-To run code from this project, first clone the repository and install dependencies by executing ```pip install -r requirements.txt```. The code was tested for Python-3.6 and Python-3.8.
+To run code from this project, first clone the repository and install dependencies by executing ```pip install -r requirements.txt```. The code was tested for Python-3.6 and Python-3.8. For GPU support (not available for macOS), add ```tensorflow-gpu===2.5.0``` to the ```requirements.txt``` file.
 
 #### Quick demonstration
 Our original full-fledged experiments involved 5 different network architectures (3 of which require a GPU) and 15 pruning algorithms combined across about 30 sparsity levels and repeated 3 times for stability of results. In total, this comes to almost 7,000 networks to be trained. For demonstration purposes, we provide a quick lightweight demonstration ```demo.py``` that requires no flags or arguments and is easily executable on a CPU-powered device.
