@@ -10,11 +10,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import os
 
-os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
-try:
-  tf.keras.backend.set_floatx('float64')
-except:
-  tf.keras.backend.set_floatx('float32')
+tf.keras.backend.set_floatx('float32')
 datagen,train_X,train_y,test_X,test_y=data.get_data('mnist')
 model,tensors=models.get_model(shape=train_X[0].shape,architecture='lenet300100')
 compressions=[10**(0.2*i) for i in range(5,26)]
@@ -32,6 +28,7 @@ for sparsity in sparsities:
   kwargs_effective_pruning={'model':model,'tensors':tensors,'sparsity':sparsity,'pruning_type':'effective','train_X':train_X,'train_y':train_y,'config':{'batch_size_snip':128}}
   direct_masks_effective_pruning={key:pruners[key].prune(**kwargs_effective_pruning) for key in pruner_names}
   effective_masks_effective_pruning={key:effective_masks_synflow(model,tensors,direct_masks_effective_pruning[key]) for key in pruner_names}
+  print('\n')
   for key in pruner_names:
     print(f'================================ [target sparsity: {sparsity:.6f}] ================================')
     print(f'<demo> {key} direct pruning    [direct sparsity: {get_overall_direct_sparsity(direct_masks_direct_pruning[key]):.6f}][effective sparsity: {get_overall_direct_sparsity(effective_masks_direct_pruning[key]):.6f}]')
