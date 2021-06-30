@@ -167,8 +167,8 @@ def effective_correction_layerwise_scores_magnitude_pruning(model,tensors,func,s
   sparsities=func(target_sparsity=target_sparsity,shapes=shapes)
   logging.info(f'<pruning> requested: ({target_sparsity:.6f})')
   direct_masks=[magnitude_layerwise(score,sparsity) for score,sparsity in zip(scores,sparsities)]
-  logging.info(f'<pruning> direct pruning overall sparsity: {get_overall_direct_sparsity(effective_masks_synflow(model,tensors,direct_masks)):.6f}')
-  logging.info(f'<pruning> effective pruning overall sparsity: {get_overall_direct_sparsity(effective_masks_synflow(model,tensors,masks)):.6f}')
+  logging.info(f'<pruning> direct pruning: overall effective sparsity: {get_overall_direct_sparsity(effective_masks_synflow(model,tensors,direct_masks)):.6f}')
+  logging.info(f'<pruning> effective pruning: overall effective sparsity: {get_overall_direct_sparsity(effective_masks_synflow(model,tensors,masks)):.6f}')
   return low_masks
 
 def uniform_quotas(target_sparsity,shapes,**kwargs):
