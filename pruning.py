@@ -284,8 +284,8 @@ class Pruner(object):
         weight_scores[last_batch]=(iteration+1)*2+(scores[last_batch]-np.min(scores[last_batch]))/(np.max(scores[last_batch])-np.min(scores[last_batch])+1e-10)
     if pruning_type=='effective':
       corrected_masks=effective_correction_from_global_scores(model,tensors,weight_scores,target_sparsity)
-      logging.info(f'<pruning> direct pruning overall sparsity: {get_overall_direct_sparsity(effective_masks_synflow(model,tensors,masks)):.6f}')
-      logging.info(f'<pruning> effective pruning overall sparsity: {get_overall_direct_sparsity(effective_masks_synflow(model,tensors,corrected_masks)):.6f}')
+      logging.info(f'<pruning> direct pruning: overall effective sparsity: {get_overall_direct_sparsity(effective_masks_synflow(model,tensors,masks)):.6f}')
+      logging.info(f'<pruning> effective pruning: overall effective sparsity: {get_overall_direct_sparsity(effective_masks_synflow(model,tensors,corrected_masks)):.6f}')
       return corrected_masks
     elif pruning_type=='direct':
       return masks
@@ -314,8 +314,8 @@ class Pruner(object):
     masks=[masks[counts_sum[layer]:counts_sum[layer+1]].reshape(shapes[layer]) for layer in range(len(tensors))]
     if pruning_type=='effective':
       corrected_masks=effective_correction_from_global_scores(model,tensors,cs,target_sparsity)
-      logging.info(f'<pruning> direct pruning overall sparsity: {get_overall_direct_sparsity(effective_masks_synflow(model,tensors,masks)):.6f}')
-      logging.info(f'<pruning> effective pruning overall sparsity: {get_overall_direct_sparsity(effective_masks_synflow(model,tensors,corrected_masks)):.6f}')
+      logging.info(f'<pruning> direct pruning: overall effective sparsity: {get_overall_direct_sparsity(effective_masks_synflow(model,tensors,masks)):.6f}')
+      logging.info(f'<pruning> effective pruning: overall effective sparsity: {get_overall_direct_sparsity(effective_masks_synflow(model,tensors,corrected_masks)):.6f}')
       return corrected_masks
     elif pruning_type=='direct':
       return masks
@@ -355,8 +355,8 @@ class Pruner(object):
     set_weights_model(model,tensors,inits)
     if pruning_type=='effective':
       corrected_masks=effective_correction_from_global_scores(model,tensors,scores,target_sparsity)
-      logging.info(f'<pruning> direct pruning overall sparsity: {get_overall_direct_sparsity(effective_masks_synflow(model,tensors,masks)):.6f}')
-      logging.info(f'<pruning> effective pruning overall sparsity: {get_overall_direct_sparsity(effective_masks_synflow(model,tensors,corrected_masks)):.6f}')
+      logging.info(f'<pruning> direct pruning: overall effective sparsity: {get_overall_direct_sparsity(effective_masks_synflow(model,tensors,masks)):.6f}')
+      logging.info(f'<pruning> effective pruning: overall effective sparsity: {get_overall_direct_sparsity(effective_masks_synflow(model,tensors,corrected_masks)):.6f}')
       return corrected_masks
     elif pruning_type=='direct':
       return masks
@@ -410,6 +410,6 @@ class Pruner(object):
       masks=low_masks
       sparsities=func(model=model,tensors=tensors,pruning_type='direct',target_sparsity=target_sparsity,**kwargs)
       direct_masks=self.prune_random(model,tensors,'direct',sparsities=sparsities)
-      logging.info(f'<pruning> direct pruning overall sparsity: {get_overall_direct_sparsity(effective_masks_synflow(model,tensors,direct_masks)):.6f}')
-      logging.info(f'<pruning> effective pruning overall sparsity: {get_overall_direct_sparsity(effective_masks_synflow(model,tensors,masks)):.6f}')
+      logging.info(f'<pruning> direct pruning: overall effective sparsity: {get_overall_direct_sparsity(effective_masks_synflow(model,tensors,direct_masks)):.6f}')
+      logging.info(f'<pruning> effective pruning: overall effective sparsity: {get_overall_direct_sparsity(effective_masks_synflow(model,tensors,masks)):.6f}')
     return masks
