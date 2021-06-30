@@ -26,6 +26,8 @@ def stabilizer_synflow(stab_low,stab_high,model,tensors,low_lim,high_lim):
     weight=model.layers[layer].get_weights()[0]
 
 def effective_masks_synflow(model,tensors,masks):
+  """ computes effective sparsity of a pruned model using SynFlow
+  """
   in_shape=model.inputs[0].get_shape().as_list()[1:]
   num_classes=model.output[0].get_shape().as_list()[0]
   shapes=[model.layers[layer].get_weights()[0].shape for layer in tensors]
@@ -36,7 +38,7 @@ def effective_masks_synflow(model,tensors,masks):
     main_tensors=linear_tensors[:7]+linear_tensors[8:12]+linear_tensors[13:17]+linear_tensors[18:]
   abs_inits=[abs(linear_model.layers[layer].get_weights()[0]) for layer in linear_tensors]
   set_weights_model(linear_model,linear_tensors,abs_inits,masks=masks)
-  #stabilizer_synflow(-7,7,linear_model,main_tensors if 'ResNet' in model.name else linear_tensors,-10,38)
+  #stabilizer_synflow(-7,7,linear_model,main_tensors if 'ResNet' in model.name else linear_tensors,-10,38) # ad-hoc weight rescaling to stabilize network's output
   with tf.GradientTape(persistent=False) as tape:
     output=linear_model(np.ones([1]+linear_model.inputs[0].shape[1:]))
     saliency=tf.reduce_sum(output)
@@ -47,6 +49,17 @@ def effective_masks_synflow(model,tensors,masks):
   return true_masks
 
 def effective_masks_custom(model_name,masks):
+  """ removes inactive neurons and connections based on topology of the network alone
+  and can sometimes underestimate the actual sparsity of the network. For example,
+  consider a kernel with a single unpruned weight in its corner. When zero-padding is
+  employed, it is possible that this weight only sees pixels from padding and should
+  therefore be considered inactivated by effective masks. While effective_masks_synflow
+  accounts for such cases, this custom method treats networks as a directed graphs only
+  and trims only those neurons / kernels that are detached from either input or output
+  layers. effective_masks_custom agrees with effective_masks_synflow on fully-connected
+  networks and some convolutional networks and always constitutes a pretty tight lower 
+  bound for effective_masks_synflow, thus useful for debugging when instability is a threat. 
+  """
   if model_name=='LeNet-300-100':
     return effective_masks_denseonly(masks)
   elif 'ResNet' in model_name:

@@ -14,7 +14,7 @@ class SubnetworkCallback(tf.keras.callbacks.Callback):
     set_weights_model(self.model,self.tensors,curr_weights,masks=self.masks)
 
 class LogCallback(tf.keras.callbacks.Callback):
-  def __init__(self,model,tensors,masks,log_list,test,train,save_prefix,save):
+  def __init__(self,model,tensors,masks,log_list,test):
     super().__init__()
     self.model=model
     self.masks=masks
@@ -24,8 +24,6 @@ class LogCallback(tf.keras.callbacks.Callback):
     self.log_list=log_list
     self.iteration=0
     self.epoch=1
-    self.save=save
-    self.save_prefix=save_prefix
     self.losses=[]
     self.accuracies=[]
   def on_train_batch_begin(self,batch,logs={}):
@@ -42,7 +40,3 @@ class LogCallback(tf.keras.callbacks.Callback):
     self.epoch+=1
   def on_train_end(self,batch,logs={}):
     self.final_weights=[self.model.layers[layer].get_weights()[0] for layer in self.tensors]
-    if self.save:
-      np.save(self.save_prefix+'log_list.npy',self.log_list)
-      np.save(self.save_prefix+'accuracies.npy',self.accuracies)
-      np.save(self.save_prefix+'losses.npy',self.losses)

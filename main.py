@@ -11,21 +11,18 @@ from utils import *
 import logging
 
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
-try:
-  tf.keras.backend.set_floatx('float64')
-except:
-  tf.keras.backend.set_floatx('float32')
+tf.keras.backend.set_floatx('float32')
 parser=argparse.ArgumentParser()
-parser.add_argument('--data',type=str,default='mnist',help='dataset (mnist, cifar10, cifar100, or tinyimagenet)')
+parser.add_argument('--data',type=str,default='mnist',help='dataset (choose one of: mnist, cifar10, cifar100, tinyimagenet)')
 parser.add_argument('--sample',type=str,default='0',help='seed code')
 parser.add_argument('--path_to_data',type=str,help='path to tinyimagenet folder')
-parser.add_argument('--save',type=int,default=1,help='save results (1) or not (0)')
-parser.add_argument('--architecture',type=str,default='lenet300100',help='network (lenet300100, lenet5, vgg16, vgg19, or resnet18)')
-parser.add_argument('--pruner',type=str,default='snip_global',help='pruner (snip, synflow, etc.)')
-parser.add_argument('--com_exp',type=float,default=None,help='target compression = 10 ** (com_exp)')
+parser.add_argument('--save',type=int,default=1,help='whetherto save results (choose one of: 0, 1)')
+parser.add_argument('--architecture',type=str,default='lenet300100',help='network type (choose one of: lenet300100, lenet5, vgg16, vgg19, resnet18)')
+parser.add_argument('--pruner',type=str,default='snip_global',help='pruner (choose one of: dense, lamp, snip, snip/iterative, synflow, random/uniform, random/erk, random/igq, random/uniform_plus, random/synflow, magnitude/global, magnitude/uniform, magnitude/erk, magnitude/igq, magnitude/uniform_plus)')
+parser.add_argument('--com_exp',type=float,default=None,help='target compression = 10 ** com_exp (overwrites --target_sparsity)')
 parser.add_argument('--target_sparsity',type=float,default=0.9,help='target sparsity (overwritten by --com_exp if given)')
-parser.add_argument('--pruning_type',type=str,default='direct',help='direct or effective pruning')
-parser.add_argument('--train',type=int,default=1,help='train (1) or prune only (0)')
+parser.add_argument('--pruning_type',type=str,default='direct',help='choose one of: direct, effective')
+parser.add_argument('--train',type=int,default=1,help='whether to train a subnetwork (choose one of: 0, 1)')
 parser.add_argument('--out_path',type=str,default='EffectiveSparsity',help='path to directory for outputs')
 args=parser.parse_args()
 args.target_sparsity=0 if args.pruner=='dense' else args.target_sparsity
@@ -51,10 +48,12 @@ if args.architecture=='resnet18':
 def main(args):
   target_compression=10**args.com_exp if args.com_exp is not None else 1./(1-args.target_sparsity)
   extension=f'{args.sample}_{int(target_compression)}_'
-  args.out_path=os.path.join(args.out_path,args.architecture,args.pruner,args.pruning_type)
   path_to_dense=os.path.join(args.out_path,args.architecture,'dense')
+  args.out_path=os.path.join(args.out_path,args.architecture,args.pruner,args.pruning_type)
   if not os.path.exists(args.out_path):
     os.makedirs(args.out_path)
+  if not os.path.exists(path_to_dense):
+    os.makedirs(path_to_dense)
   logging.basicConfig(filename=os.path.join(args.out_path,extension+'info.log'),level=logging.INFO,filemode='w')
   datagen,train_X,train_y,test_X,test_y=data.get_data(args.data,path_to_data=args.path_to_data)
   epochs=int(config['batch_size_train']*config['iterations']/len(train_X))
@@ -66,25 +65,23 @@ def main(args):
   pruner=pruning.Pruner(args.pruner)
   masks=pruner.prune(model,tensors,1-1./target_compression,args.pruning_type,epochs=epochs,train_X=train_X,train_y=train_y,out_path=os.path.join(args.out_path,extension),config=config,sample=args.sample,path_to_dense=path_to_dense)
   inits=[model.layers[layer].get_weights()[0] for layer in tensors]
-  log_cb=callbacks.LogCallback(model,tensors,masks,log_list,(test_X,test_y),(train_X,train_y),os.path.join(args.out_path,extension),args.save)
+  log_cb=callbacks.LogCallback(model,tensors,masks,log_list,(test_X,test_y))
   fit_callbacks=[callbacks.SubnetworkCallback(model,tensors,masks),log_cb]
   eff_masks_custom=effective_masks_custom(model.name,masks)
   eff_masks_synflow=effective_masks_synflow(model,tensors,masks)
   logging.info(f'<main> [direct sparsity: {get_overall_direct_sparsity(masks):.6f}][effective sparsity: {get_overall_direct_sparsity(eff_masks_synflow):.6f}][epochs to train: {epochs}][iterations to train: {config["iterations"]}][pruner: {args.pruner}][sample: {args.sample}]')
-  if args.train:
-    if np.array(get_direct_sparsity(eff_masks_synflow)==1).all():
-      if args.save:
-        np.save(os.path.join(args.out_path,extension)+'accuracies.npy',np.array([1./len(train_y[0])]))
-    else:
-      model.fit(datagen.flow(train_X,train_y,batch_size=config['batch_size_train']),steps_per_epoch=len(train_X)//config['batch_size_train'],epochs=epochs,shuffle=True,verbose=False,validation_data=(test_X,test_y),callbacks=fit_callbacks)
-  if args.save:
+  if args.save and args.pruner!='dense':
     np.save(os.path.join(args.out_path,extension)+'sparsities_effective_synflow.npy',get_direct_sparsity(eff_masks_synflow))
     np.save(os.path.join(args.out_path,extension)+'sparsities_effective_custom.npy',get_direct_sparsity(eff_masks_custom))
     np.save(os.path.join(args.out_path,extension)+'sparsities_direct.npy',get_direct_sparsity(masks))
-    if args.train and args.pruner=='dense':
-      np.save(os.path.join(args.out_path,extension)+'inits.npy',inits)
-      np.save(os.path.join(args.out_path,extension)+'final_weights.npy',log_cb.final_weights)
-      np.save(os.path.join(args.out_path,extension)+'counts.npy',[np.prod(model.layers[layer].get_weights()[0].shape) for layer in tensors])
+    np.save(os.path.join(path_to_dense,'counts.npy'),[np.prod(model.layers[layer].get_weights()[0].shape) for layer in tensors])
+  if args.train:
+    model.fit(datagen.flow(train_X,train_y,batch_size=config['batch_size_train']),steps_per_epoch=len(train_X)//config['batch_size_train'],epochs=epochs,shuffle=True,verbose=False,validation_data=(test_X,test_y),callbacks=fit_callbacks)
+    np.save(os.path.join(args.out_path,extension)+'accuracies.npy',log_cb.accuracies)
+    np.save(os.path.join(args.out_path,extension)+'losses.npy',log_cb.losses)
+  if args.save and args.train and args.pruner=='dense':
+    np.save(os.path.join(args.out_path,extension)+'inits.npy',inits)
+    np.save(os.path.join(args.out_path,extension)+'final_weights.npy',log_cb.final_weights)
 
 if __name__=="__main__":
   main(args)

@@ -9,7 +9,8 @@ import logging
 
 def lamp(weights,target_sparsity):
   shapes=[weight.shape for weight in weights]
-  counts=[0]+[np.prod(weight.shape) for weight in weights]
+  counts=[np.prod(shape) for shape in shapes]
+  counts_sum=[sum(counts[:layer]) for layer in range(len(shapes)+1)]
   wsorted_squared=[sorted((weight**2).reshape(-1)) for weight in weights]
   partial_sums=[]
   for w in wsorted_squared:
@@ -37,7 +38,8 @@ def magnitude_layerwise(weight,target_sparsity):
 
 def magnitude_global(weights,target_sparsity):
   shapes=[weight.shape for weight in weights]
-  counts=[0]+[np.prod(weight.shape) for weight in weights]
+  counts=[np.prod(shape) for shape in shapes]
+  counts_sum=[sum(counts[:layer]) for layer in range(len(shapes)+1)]
   scores=np.concatenate([np.abs(weight.reshape(-1)) for weight in weights])
   masks=np.ones((sum(counts)))
   masks[scores.argsort()[:int(target_sparsity*sum(counts))]]=0.
@@ -183,6 +185,7 @@ class Pruner(object):
         inits=np.load(f'{kwargs["path_to_dense"]}/{kwargs["sample"]}_1_inits.npy',allow_pickle=True)
       except:
         logging.error(f'<pruning> required files in ({kwargs["path_to_dense"]}/{kwargs["sample"]}) do not exist.')
+        raise FileNotFoundError
       set_weights_model(model,tensors,inits)
       scores,masks=lamp(final_weights,sparsity)
       corrected_masks=effective_correction_from_global_scores(model,tensors,scores,sparsity)
@@ -197,6 +200,7 @@ class Pruner(object):
         inits=np.load(f'{kwargs["path_to_dense"]}/{kwargs["sample"]}_1_inits.npy',allow_pickle=True)
       except:
         logging.error(f'<pruning> required files in ({kwargs["path_to_dense"]}/{kwargs["sample"]}) do not exist.')
+        raise FileNotFoundError
       if self.mode=='magnitude/erk':
         corrected_masks=effective_correction_layerwise_scores_magnitude_pruning(model,tensors,erk_quotas,abs(final_weights),sparsity)
         sparsities=check_valid_sparsities(erk_quotas(sparsity,shapes))
@@ -248,7 +252,8 @@ class Pruner(object):
     elif self.mode=='dense':
       return [np.ones(shape) for shape in shapes]
     else:
-      raise logging.error(f'<pruning> unknown pruner "{self.mode}" encountered.')
+      logging.error(f'<pruning> unknown pruner "{self.mode}" encountered.')
+      raise NotImplementedError
 
   def prune_synflow(self,model,tensors,target_sparsity,pruning_type,train_X,train_y,**kwargs):
     shapes=[model.layers[layer].get_weights()[0].shape for layer in tensors]
