@@ -63,7 +63,7 @@ def main(args):
   model.compile(optimizer=tf.keras.optimizers.SGD(learning_rate=learningrate,momentum=config['momentum']),loss='categorical_crossentropy',metrics=['accuracy'])
   log_list=np.arange(0,config['iterations'],1000)
   pruner=pruning.Pruner(args.pruner)
-  masks=pruner.prune(model,tensors,1-1./target_compression,args.pruning_type,epochs=epochs,train_X=train_X,train_y=train_y,out_path=os.path.join(args.out_path,extension),config=config,sample=args.sample,path_to_dense=path_to_dense)
+  masks=pruner.prune(model,tensors,1-1./target_compression,args.pruning_type,train_X=train_X,train_y=train_y,out_path=os.path.join(args.out_path,extension),config=config,sample=args.sample,path_to_dense=path_to_dense)
   inits=[model.layers[layer].get_weights()[0] for layer in tensors]
   log_cb=callbacks.LogCallback(model,tensors,masks,log_list,(test_X,test_y))
   fit_callbacks=[callbacks.SubnetworkCallback(model,tensors,masks),log_cb]
