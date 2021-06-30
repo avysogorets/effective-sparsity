@@ -9,7 +9,7 @@ To run code from this project, first clone the repository and install dependenci
 Our original full-fledged experiments involved 5 different network architectures (3 of which require a GPU) and 15 pruning algorithms combined across about 30 sparsity levels and repeated 3 times for stability of results. In total, this comes to almost 7,000 networks to be trained. For demonstration purposes, we provide a quick lightweight demonstration ```demo.py``` that requires no flags or arguments and is easily executable on a CPU-powered device.
 
 #### Original experiments
-To replicate our results, run ```python main.py``` with a selection of arguments (run ```python main.py --help``` for description). For example,
+To replicate our results, run ```python main.py``` with a selection of arguments (run ```python main.py --help``` for a description). For example,
 ```python main.py --sample=0 --architecture=lenet300100 --data=mnist --pruner=snip --target_sparsity=0.99 --pruning_type=effective --train=1``` will use SNIP to prune LeNet-300-100 to 99% effective sparsity and train this subnetwork on MNIST. Provided ```--save=1``` (default), all output and log files are saved to ```--out_path/--architecture/--pruner/--pruning_type``` in the following format: ```{--sample}_{compression}_<description_of_output>.<ext>```, where ```<ext>``` can be either ```.log``` (for ```info.log```) or ```.npy``` for actual output files (e.g., ```0_10_accuracies.npy```). ```compression``` (direct or effective, depending on ```pruning_type```) is calculated using ```--target_sparsity``` as ```1/(1-target_sparsity)``` or ```--com_exp``` as ```10^(com_exp)```. The latter flag overrides ```--target_sparsity``` if specified. 
 
 #### Visualizing results
