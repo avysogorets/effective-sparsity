@@ -15,7 +15,7 @@ To replicate our results, run ```python main.py``` with a selection of arguments
 ```wget http://cs231n.stanford.edu/tiny-imagenet-200.zip```<br />
 ```unzip tiny-imagenet-200.zip```
 
-and pass path to this folder as ```path_to_data```. MNIST and CIFAR-10/100 will be downloaded automatically when they are first needed. **Important:** avoid multiple scripts downloading the same dataset concurrently---this may result in damaged data files.
+and pass the path to this folder using ```--path_to_data```. MNIST and CIFAR-10/100 will be downloaded automatically when they are first needed. **Important:** avoid multiple scripts downloading the same dataset concurrently---this may result in damaged data files.
 
 #### Visualizing results
 The ```visualization.py``` file produces graphs out of output files generated in the above step. Execute ```python visualization.py --help``` for the full list of flags and their description. To generate plots for LeNet-300-100 effectively pruned by SNIP, SynFlow, and IGQ (random) averaged across 3 samples, run ```python visualization.py --architecture=lenet300100 --pruners_to_display=snip synflow random/igq --num_samples=3 --pruning_type=effective```. Plots are saved to ```--out_path/--architecture/figures```.
