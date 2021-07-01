@@ -93,7 +93,7 @@ def uniform_plus_quotas(target_sparsity,shapes,**kwargs):
   sparsity=target_sparsity*sum(counts)/sum(counts[1:])
   to_distribute=max([0,(sparsity-0.8)*counts[-1]])
   additional_sparsity=to_distribute/(sum(counts[1:-1]))
-  return np.concatenate([0.],[sparsity+additional_sparsity]*(len(counts)-2),[min([sparsity,0.8])])
+  return np.concatenate([[0.],[sparsity+additional_sparsity]*(len(counts)-2),[min([sparsity,0.8])]])
 
 def effective_correction_from_global_scores(model,tensors,scores,target_sparsity):
   shapes=[model.layers[layer].get_weights()[0].shape for layer in tensors]
