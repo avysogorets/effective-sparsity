@@ -13,10 +13,9 @@ import logging
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 tf.keras.backend.set_floatx('float32')
 parser=argparse.ArgumentParser()
-parser.add_argument('--data',type=str,default='mnist',help='dataset (choose one of: mnist, cifar10, cifar100, tinyimagenet)')
 parser.add_argument('--sample',type=str,default='0',help='seed code')
 parser.add_argument('--path_to_data',type=str,help='path to tinyimagenet folder')
-parser.add_argument('--save',type=int,default=1,help='whether to save results (choose one of: 0, 1)')
+parser.add_argument('--save',type=int,default=1,help='whether to save output files (choose one of: 0, 1)')
 parser.add_argument('--architecture',type=str,default='lenet300100',help='network type (choose one of: lenet300100, lenet5, vgg16, vgg19, resnet18)')
 parser.add_argument('--pruner',type=str,default='snip_global',help='pruner (choose one of: dense, lamp, snip, snip/iterative, synflow, random/uniform, random/erk, random/igq, random/uniform_plus, random/synflow, magnitude/global, magnitude/uniform, magnitude/erk, magnitude/igq, magnitude/uniform_plus)')
 parser.add_argument('--com_exp',type=float,default=None,help='target compression = 10 ** com_exp (overwrites --target_sparsity)')
@@ -28,11 +27,11 @@ args=parser.parse_args()
 args.target_sparsity=0 if args.pruner=='dense' else args.target_sparsity
 args.pruning_type='' if args.pruner=='dense' else args.pruning_type
 
-lenet300100_config={'lr':0.1,'batch_size_train':100,'iterations':96000,'weight_decay':0.0005,'batchnorm':True,'momentum':0.9,'lr_decay':[25000,50000,75000,100000],'batch_size_snip':100} # source: Lee et al., 2018
-lenet5_config={'lr':0.1,'batch_size_train':128,'iterations':120000,'weight_decay':0.0005,'batchnorm':True,'momentum':0.9,'lr_decay':[30000,60000,90000,120000],'batch_size_snip':128} # source: Lee et al., 2018
-vgg16_config={'lr':0.1,'batch_size_train':128,'iterations':62500,'weight_decay':0.0001,'batchnorm':True,'momentum':0.9,'lr_decay':[31250,46875],'batch_size_snip':128} # source: Frankle et al., 2020
-vgg19_config={'lr':0.1,'batch_size_train':128,'iterations':62500,'weight_decay':0.0001,'batchnorm':True,'momentum':0.9,'lr_decay':[31250,46875],'batch_size_snip':1280} # source: Wang et al., 2020
-resnet18_config={'lr':0.2,'batch_size_train':256,'iterations':78200,'weight_decay':0.0001,'batchnorm':True,'momentum':0.9,'lr_decay':[39100,58650],'batch_size_snip':2560} # source: Frankle et al., 2020
+lenet300100_config={'data':'mnist','lr':0.1,'batch_size_train':100,'iterations':96000,'weight_decay':0.0005,'batchnorm':True,'momentum':0.9,'lr_decay':[25000,50000,75000,100000],'batch_size_snip':100} # source: Lee et al., 2018
+lenet5_config={'data':'cifar10','lr':0.1,'batch_size_train':128,'iterations':120000,'weight_decay':0.0005,'batchnorm':True,'momentum':0.9,'lr_decay':[30000,60000,90000,120000],'batch_size_snip':128} # source: Lee et al., 2018
+vgg16_config={'data':'cifar10','lr':0.1,'batch_size_train':128,'iterations':62500,'weight_decay':0.0001,'batchnorm':True,'momentum':0.9,'lr_decay':[31250,46875],'batch_size_snip':128} # source: Frankle et al., 2020
+vgg19_config={'data':'cifar100','lr':0.1,'batch_size_train':128,'iterations':62500,'weight_decay':0.0001,'batchnorm':True,'momentum':0.9,'lr_decay':[31250,46875],'batch_size_snip':1280} # source: Wang et al., 2020
+resnet18_config={'data':'tinyimagenet','lr':0.2,'batch_size_train':256,'iterations':78200,'weight_decay':0.0001,'batchnorm':True,'momentum':0.9,'lr_decay':[39100,58650],'batch_size_snip':2560} # source: Frankle et al., 2020
 
 if args.architecture=='lenet300100':
   config=lenet300100_config
@@ -55,7 +54,7 @@ def main(args):
   if not os.path.exists(path_to_dense):
     os.makedirs(path_to_dense)
   logging.basicConfig(filename=os.path.join(args.out_path,extension+'info.log'),level=logging.INFO,filemode='w')
-  datagen,train_X,train_y,test_X,test_y=data.get_data(args.data,path_to_data=args.path_to_data)
+  datagen,train_X,train_y,test_X,test_y=data.get_data(config['data'],path_to_data=args.path_to_data)
   epochs=int(config['batch_size_train']*config['iterations']/len(train_X))
   model,tensors=models.get_model(shape=train_X[0].shape,architecture=args.architecture,batchnorm=config['batchnorm'],decay=config['weight_decay'],output_classes=len(train_y[0]))
   values=[config['lr']*(0.1**i) for i in range(len(config['lr_decay'])+1)]

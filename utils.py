@@ -1,4 +1,5 @@
 import numpy as np
+import logging
 
 def set_weights_layer(model,layer,weight,mask=None):
   mask=np.ones(weight.shape) if mask is None else mask
@@ -22,5 +23,6 @@ def get_overall_direct_sparsity(matrices):
   return overall_sparsity
 
 def check_valid_sparsities(sparsities):
+  if sum([int(s<=1 and s>=0) for s in sparsities])<len(sparsities): logging.error(f"<utils> invalid sparsities {sparsities} encountered.")
   assert sum([int(s<=1 and s>=0) for s in sparsities])==len(sparsities),f"<utils> invalid sparsities {sparsities} encountered."
-  return sparsities
+  return np.array(sparsities)
