@@ -4,7 +4,6 @@ import os
 import math
 import argparse
 import matplotlib.pyplot as plt
-from matplotlib import rcParams
 fig,ax=plt.subplots(nrows=1,ncols=1,figsize=[6,4])
 
 parser=argparse.ArgumentParser()
