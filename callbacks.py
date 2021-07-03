@@ -32,7 +32,7 @@ class LogCallback(tf.keras.callbacks.Callback):
       self.losses.append(test_metrics[0])
       self.accuracies.append(test_metrics[1])
       if len(self.accuracies)>5 and sum(self.accuracies[-3:])<=3*(1./len(self.test_y[0])):
-        self.model.stop_training # stop training if accuracy doesn't improve
+        self.model.stop_training # stop training if accuracy doesn't improve on random guessing
         self.on_train_end(self.iteration)
       logging.info(f"<callbacks> [iteration/epoch: {self.iteration}/{self.epoch}][lr: {self.model.optimizer.lr(self.iteration):.4f}][val loss: {test_metrics[0]:.4f}][val acc: {test_metrics[1]:.4f}]")
     self.iteration+=1
