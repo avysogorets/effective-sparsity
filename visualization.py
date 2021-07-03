@@ -50,7 +50,7 @@ def accuracies(args):
     overall_effective_compression={pruner:1./(1-overall_effective_sparsity[pruner]) for pruner in args.pruners_to_display}
     dense=np.array([np.load(os.path.join(args.out_path,args.architecture,'dense',f'{sample}_1_accuracies.npy'))[-1] for sample in range(args.num_samples)])
     dense_min,dense_mean,dense_max=np.min(dense),np.mean(dense),np.max(dense)
-    ticks={pruner:10**(0.05*np.arange(20,max(compressions[pruner])/1000,20/9)) for pruner in args.pruners_to_display}
+    ticks={pruner:10**(0.05*np.arange(20,20*np.log10(compressions[pruner][-1]),20/9)) for pruner in args.pruners_to_display}
     accuracies_direct_sorted={pruner:[accuracies[pruner][sample][overall_direct_compression[pruner][sample].argsort()] for sample in range(args.num_samples)] for pruner in args.pruners_to_display}
     overall_direct_compression={pruner:[sorted(overall_direct_compression[pruner][sample]) for sample in range(args.num_samples)] for pruner in args.pruners_to_display}
     inf_idxs_direct={pruner:[np.where(np.array(overall_direct_compression[pruner][sample])>1e20)[0][0] if sum([int(direct_compression>1e20) for direct_compression in overall_direct_compression[pruner][sample]])>0 else len(overall_direct_compression[pruner][sample]) for sample in range(args.num_samples)] for pruner in args.pruners_to_display}
