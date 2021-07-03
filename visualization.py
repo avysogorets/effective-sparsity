@@ -18,7 +18,7 @@ args=parser.parse_args()
 if not os.path.exists(os.path.join(args.out_path,args.architecture,'figures')):
     os.makedirs(os.path.join(args.out_path,args.architecture,'figures'))
 
-pruners=['random/erk','random/igq','magnitude/gobal','snip','snip/iterative','random/snip','synflow','random/synflow','random/uniform','lamp','magnitude/pistons','magnitude/uniform','magnitude/erk','magnitude/uniform_plus','random/uniform_plus']
+pruners=['random/erk','random/igq','magnitude/global','snip','snip/iterative','random/snip','synflow','random/synflow','random/uniform','lamp','magnitude/pistons','magnitude/uniform','magnitude/erk','magnitude/uniform_plus','random/uniform_plus']
 network_names={'lenet300100':'LeNet-300-100','lenet5':'LeNet-5','vgg16':'VGG-16','vgg19':'VGG-19','resnet18':'ResNet-18'}
 pruner_names=['ERK (random)','IGQ (random)','Global (magnitude)','SNIP','SNIP-iterative','SNIP (random)','SynFlow','SynFlow (random)','Uniform (random)','LAMP',"IGQ (magnitude)","Uniform (magnitude)","ERK (magnitude)","Uniform+ (magnitude)","Uniform+ (random)"]
 pruner_names={pruner:name for pruner,name in zip(pruners,pruner_names)}
@@ -143,7 +143,6 @@ def compressions(args):
     overall_effective_compression={pruner:1./(1-overall_effective_sparsity[pruner]) for pruner in args.pruners_to_display}
     inf_idxs_effective={pruner:np.array([np.where(np.array(overall_effective_compression[pruner][sample])>1e20)[0][0] if sum([int(effective_compression>1e20) for effective_compression in overall_effective_compression[pruner][sample]])>0 else len(overall_effective_compression[pruner][sample]) for sample in range(args.num_samples)]) for pruner in args.pruners_to_display}
     overall_effective_compression={pruner:overall_effective_compression[pruner][inf_idxs_effective[pruner].argsort()[-args.num_samples//2:]] for pruner in args.pruners_to_display}
-    print([len(overall_effective_compression[pruner]) for pruner in args.pruners_to_display])
     overall_effective_compression_min={pruner:np.min(overall_effective_compression[pruner],axis=0) for pruner in args.pruners_to_display}
     overall_effective_compression_mean={pruner:np.mean(overall_effective_compression[pruner],axis=0) for pruner in args.pruners_to_display}
     overall_effective_compression_max={pruner:np.max(overall_effective_compression[pruner],axis=0) for pruner in args.pruners_to_display}
