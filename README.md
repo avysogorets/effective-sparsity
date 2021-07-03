@@ -6,7 +6,7 @@ This repository contains code for the experimental section of the paper *[Connec
 To run code from this project, first clone the repository and install dependencies by executing ```pip install -r requirements.txt```. The code was tested for Python-3.6 and Python-3.8. For GPU support (not available for macOS), add ```tensorflow-gpu===2.5.0``` to the ```requirements.txt``` file.
 
 #### Quick demonstration
-Our original full-fledged experiments involved 5 different network architectures (3 of which require a GPU) and 15 pruning algorithms combined across about 30 sparsity levels and repeated 3 times for stability of results. In total, this comes to almost 7,000 networks to be trained. For demonstration purposes, we provide a quick lightweight demonstration ```demo.py``` that requires no flags or arguments and takes only a few minutes to execute on a CPU-powered device.
+Our original full-fledged experiments involved 5 different network architectures (3 of which require a GPU) and 15 pruning algorithms combined across about 30 sparsity levels and repeated 3 times for stability of results. In total, this comes to almost 7,000 networks to be trained. For demonstration purposes, we provide a quick lightweight demonstration ```demo.py``` that requires no flags or arguments and takes only a few minutes to execute on a CPU-powered device. Run ```python demo.py``` for this demo.
 
 #### Original experiments
 To replicate our results, run ```python main.py``` with a selection of arguments (run ```python main.py --help``` for a description). For example,
