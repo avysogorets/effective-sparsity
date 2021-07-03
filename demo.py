@@ -21,6 +21,7 @@ direct_compressions_direct_pruning={key:[] for key in pruner_names}
 effective_compressions_direct_pruning={key:[] for key in pruner_names}
 direct_compressions_effective_pruning={key:[] for key in pruner_names}
 effective_compressions_effective_pruning={key:[] for key in pruner_names}
+print('\n')
 for sparsity in sparsities:
   kwargs_direct_pruning={'model':model,'tensors':tensors,'sparsity':sparsity,'pruning_type':'direct','train_X':train_X,'train_y':train_y,'config':{'batch_size_snip':128}}
   direct_masks_direct_pruning={key:pruners[key].prune(**kwargs_direct_pruning) for key in pruner_names}

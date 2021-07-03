@@ -11,7 +11,6 @@ from utils import *
 import logging
 
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
-tf.keras.backend.set_floatx('float32')
 parser=argparse.ArgumentParser()
 parser.add_argument('--sample',type=str,default='0',help='seed code')
 parser.add_argument('--path_to_data',type=str,help='path to tinyimagenet folder')
