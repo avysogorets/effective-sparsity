@@ -10,18 +10,17 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import os
 
-tf.keras.backend.set_floatx('float32')
+os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 datagen,train_X,train_y,test_X,test_y=data.get_data('mnist')
 model,tensors=models.get_model(shape=train_X[0].shape,architecture='lenet300100')
 compressions=[10**(0.2*i) for i in range(5,26)]
 sparsities=[1-1./compression for compression in compressions]
-pruner_names=['random/igq','synflow'] # any random, snip, snip/iterative, or synflow.
+pruner_names=['random/igq'] # any random, snip, snip/iterative, or synflow.
 pruners={key:pruning.Pruner(key) for key in pruner_names}
 direct_compressions_direct_pruning={key:[] for key in pruner_names}
 effective_compressions_direct_pruning={key:[] for key in pruner_names}
 direct_compressions_effective_pruning={key:[] for key in pruner_names}
 effective_compressions_effective_pruning={key:[] for key in pruner_names}
-print('\n')
 for sparsity in sparsities:
   kwargs_direct_pruning={'model':model,'tensors':tensors,'sparsity':sparsity,'pruning_type':'direct','train_X':train_X,'train_y':train_y,'config':{'batch_size_snip':128}}
   direct_masks_direct_pruning={key:pruners[key].prune(**kwargs_direct_pruning) for key in pruner_names}
