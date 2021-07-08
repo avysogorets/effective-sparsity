@@ -1,6 +1,6 @@
 ## Effective Sparsity
 
-This repository contains code for the experimental section of the paper *[Connectivity Matters: Neural Network Pruning Through the Lens of Effective Sparsity](https://arxiv.org/user/)*.
+This repository contains code for the experimental section of the paper *[Connectivity Matters: Neural Network Pruning Through the Lens of Effective Sparsity](https://arxiv.org/abs/2107.02306)*.
 
 #### Environment
 To run code from this project, first clone the repository and install dependencies by executing ```pip install -r requirements.txt```. The code was tested for Python-3.6 and Python-3.8. For GPU support (not available for macOS), add ```tensorflow-gpu===2.5.0``` to the ```requirements.txt``` file.
