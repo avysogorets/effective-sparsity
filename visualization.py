@@ -35,7 +35,7 @@ def accuracies(args):
     load_prefix={pruner:os.path.join(args.out_path,args.architecture,pruner,args.pruning_type) for pruner in args.pruners_to_display}
     for pruner in args.pruners_to_display:
         for filename in os.listdir(load_prefix[pruner]):
-            if os.path.isfile(os.path.join(load_prefix[pruner],filename)):
+            if os.path.isfile(os.path.join(load_prefix[pruner],filename)) and filename[0]!='.':
                 compression=int(filename.split('_')[1])
                 if 'accuracies.npy' in filename:
                     compressions[pruner].add(compression)
@@ -50,9 +50,9 @@ def accuracies(args):
     overall_effective_compression={pruner:1./(1-overall_effective_sparsity[pruner]) for pruner in args.pruners_to_display}
     dense=np.array([np.load(os.path.join(args.out_path,args.architecture,'dense',f'{sample}_1_accuracies.npy'))[-1] for sample in range(args.num_samples)])
     dense_min,dense_mean,dense_max=np.min(dense),np.mean(dense),np.max(dense)
-    ticks={pruner:10**(0.05*np.arange(20,20*np.log10(compressions[pruner][-1]),20/9)) for pruner in args.pruners_to_display}
     accuracies_direct_sorted={pruner:[accuracies[pruner][sample][overall_direct_compression[pruner][sample].argsort()] for sample in range(args.num_samples)] for pruner in args.pruners_to_display}
     overall_direct_compression={pruner:[sorted(overall_direct_compression[pruner][sample]) for sample in range(args.num_samples)] for pruner in args.pruners_to_display}
+    ticks={pruner:10**(0.05*np.arange(max([min(overall_direct_compression[pruner][sample]) for sample in range(args.num_samples)]),20*np.log10(compressions[pruner][-1]),20/9)) for pruner in args.pruners_to_display}
     inf_idxs_direct={pruner:[np.where(np.array(overall_direct_compression[pruner][sample])>1e20)[0][0] if sum([int(direct_compression>1e20) for direct_compression in overall_direct_compression[pruner][sample]])>0 else len(overall_direct_compression[pruner][sample]) for sample in range(args.num_samples)] for pruner in args.pruners_to_display}
     for pruner in args.pruners_to_display:
         means,mins,maxs,start_idx,end_idx=[],[],[],math.inf,len(ticks[pruner])
@@ -71,8 +71,6 @@ def accuracies(args):
                         end_idx=min([end_idx,tick_idx])
                 else:
                     curr_accs.append(random[args.architecture])
-                    end_idx=min([end_idx,tick_idx])
-            assert len(curr_accs)>0,"no accuracy data for given ticks."
             mins.append(np.min(curr_accs))
             means.append(np.mean(curr_accs))
             maxs.append(np.max(curr_accs))
@@ -82,6 +80,7 @@ def accuracies(args):
         legend_elements+=[mpl.patches.Patch(facecolor=color_map[pruner],label=pruner_names[pruner])]
     accuracies_effective_sorted={pruner:[accuracies[pruner][sample][overall_effective_compression[pruner][sample].argsort()] for sample in range(args.num_samples)] for pruner in args.pruners_to_display}
     overall_effective_compression={pruner:[sorted(overall_effective_compression[pruner][sample]) for sample in range(args.num_samples)] for pruner in args.pruners_to_display}
+    ticks={pruner:10**(0.05*np.arange(max([min(overall_effective_compression[pruner][sample]) for sample in range(args.num_samples)]),20*np.log10(compressions[pruner][-1]),20/9)) for pruner in args.pruners_to_display}
     inf_idxs_effective={pruner:[np.where(np.array(overall_effective_compression[pruner][sample])>1e20)[0][0] if sum([int(effective_compression>1e20) for effective_compression in overall_effective_compression[pruner][sample]])>0 else len(overall_effective_compression[pruner][sample]) for sample in range(args.num_samples)] for pruner in args.pruners_to_display}
     for pruner in args.pruners_to_display:
         means,mins,maxs,start_idx,end_idx=[],[],[],math.inf,len(ticks[pruner])
@@ -100,8 +99,6 @@ def accuracies(args):
                         end_idx=min([end_idx,tick_idx])
                 else:
                     curr_accs.append(random[args.architecture])
-                    end_idx=min([end_idx,tick_idx])
-            assert len(curr_accs)>0,"no accuracy data for given ticks."
             mins.append(np.min(curr_accs))
             means.append(np.mean(curr_accs))
             maxs.append(np.max(curr_accs))
@@ -118,7 +115,7 @@ def accuracies(args):
     ax.set_xlabel("Compression",fontsize='medium')
     ax.set_ylabel(f"Top-1 test accuracy",fontsize='medium')
     ax.tick_params(axis='both',labelsize='medium')
-    ax.legend(handles=legend_elements,loc='upper right',markerscale=1,fontsize='medium')
+    ax.legend(handles=legend_elements,loc='lower left',markerscale=1,fontsize='medium')
     ax.set_xscale('log',base=10)
     ax.grid(zorder=0,ls='dashed',alpha=0.6)
     fig.tight_layout()
